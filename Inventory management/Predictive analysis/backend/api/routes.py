@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from models.sales_model import SalesPredictor
-from utils.data_preprocessing import preprocess_data
 
 api_blueprint = Blueprint('api', __name__)
 
@@ -8,6 +7,9 @@ api_blueprint = Blueprint('api', __name__)
 def predict():
     try:
         data = request.get_json()
+        if not data:
+            raise ValueError("No input data provided")
+            
         item_id = data.get('item_id')
         forecast_days = data.get('forecast_days', 30)
         
