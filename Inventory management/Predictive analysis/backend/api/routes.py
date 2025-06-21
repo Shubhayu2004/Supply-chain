@@ -2,27 +2,21 @@ from flask import Blueprint, request, jsonify
 from models.sales_model import SalesPredictor
 from utils.validators import validate_predict_input
 from .middleware import handle_errors
+import os
+import pandas as pd
 
 api_blueprint = Blueprint('api', __name__)
 
 @api_blueprint.route('/predict', methods=['POST'])
-@handle_errors
 def predict():
     data = request.get_json()
-    is_valid, error = validate_predict_input(data)
-    
-    if not is_valid:
-        return jsonify({
-            'status': 'error',
-            'message': error
-        }), 400
-        
+    item_id = data.get('item_id')
+    forecast_days = int(data.get('forecast_days', 7))
+    if not item_id or '|' not in item_id:
+        return jsonify({'status': 'error', 'message': 'Invalid item_id'}), 400
+    brand, description = item_id.split('|', 1)
     predictor = SalesPredictor()
-    result = predictor.predict(
-        item_id=data['item_id'],
-        forecast_days=data.get('forecast_days', 7)
-    )
-    
+    result = predictor.predict(brand, description, forecast_days)
     return jsonify({
         'status': 'success',
         'forecast': result['forecast'],
@@ -38,3 +32,13 @@ def model_info():
         'status': 'success',
         'info': info
     }), 200
+
+@api_blueprint.route('/items', methods=['GET'])
+def get_items():
+    # Adjust the path to your data file as needed
+    data_path = os.path.join(os.path.dirname(__file__), '../../data/preprocessed/sales_and_purchase_prices.csv')
+    df = pd.read_csv(data_path)
+    # Combine Brand and Description for unique item identifier
+    df['item_id'] = df['Brand'].astype(str) + '|' + df['Description'].astype(str)
+    items = df[['item_id', 'Brand', 'Description']].drop_duplicates().to_dict(orient='records')
+    return jsonify(items)

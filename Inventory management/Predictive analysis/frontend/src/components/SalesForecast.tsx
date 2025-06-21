@@ -1,30 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { Box, Button, TextField, Typography, Paper } from '@mui/material';
-import { Line } from 'react-chartjs-2';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, TextField, Typography, Paper, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
 import axios from 'axios';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  ChartData,
-  ChartOptions
-} from 'chart.js';
+import { API_CONFIG } from '../config/api';
 
-// Register Chart.js components
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+interface ItemOption {
+  item_id: string;
+  Brand: string;
+  Description: string;
+}
 
 interface ForecastData {
   forecast: number[];
@@ -38,78 +21,26 @@ interface ForecastData {
 const SalesForecast: React.FC = () => {
   const [itemId, setItemId] = useState('');
   const [forecastDays, setForecastDays] = useState(7);
+  const [itemOptions, setItemOptions] = useState<ItemOption[]>([]);
   const [forecastData, setForecastData] = useState<ForecastData | null>(null);
-  const chartRef = useRef<ChartJS<"line">>(null);
 
-  // ...rest of your component code...
+  useEffect(() => {
+    axios.get(`${API_CONFIG.BASE_URL}/items`).then(res => {
+      setItemOptions(res.data);
+    });
+  }, []);
 
   const getForecast = async () => {
-    if (!itemId || !forecastDays) return;
     try {
-      const response = await axios.post<ForecastData>('/api/forecast', {
+      const response = await axios.post(`${API_CONFIG.BASE_URL}/predict`, {
         item_id: itemId,
-        days: forecastDays
+        forecast_days: forecastDays
       });
       setForecastData(response.data);
     } catch (error) {
-      console.error('Error fetching forecast:', error);
-      setForecastData(null);
+      alert('Error fetching forecast. Please check your input.');
     }
   };
-
-  const chartOptions: ChartOptions<'line'> = {
-    responsive: true,
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: 'Days'
-        }
-      },
-      y: {
-        display: true,
-        title: {
-          display: true,
-          text: 'Sales Quantity'
-        }
-      }
-    }
-  };
-
-  const chartData: ChartData<'line'> | null = forecastData ? {
-    labels: Array.from({ length: forecastData.forecast.length }, (_, i) => `Day ${i + 1}`),
-    datasets: [
-      {
-        label: 'Ensemble Forecast',
-        data: forecastData.forecast,
-        borderColor: 'rgb(75, 192, 192)',
-        tension: 0.1
-      },
-      {
-        label: 'SARIMA',
-        data: forecastData.individual_forecasts.sarima,
-        borderColor: 'rgb(255, 99, 132)',
-        tension: 0.1,
-        borderDash: [5, 5]
-      },
-      {
-        label: 'XGBoost',
-        data: forecastData.individual_forecasts.xgboost,
-        borderColor: 'rgb(54, 162, 235)',
-        tension: 0.1,
-        borderDash: [5, 5]
-      },
-      {
-        label: 'Holt-Winters',
-        data: forecastData.individual_forecasts.holtwinters,
-        borderColor: 'rgb(255, 206, 86)',
-        tension: 0.1,
-        borderDash: [5, 5]
-      }
-    ]
-  } : null;
-
 
   return (
     <Box p={3}>
@@ -118,30 +49,36 @@ const SalesForecast: React.FC = () => {
           Sales Forecast
         </Typography>
         <Box display="flex" gap={2} mb={2}>
-          <TextField
-            label="Item ID"
-            value={itemId}
-            onChange={(e) => setItemId(e.target.value)}
-          />
+          <FormControl sx={{ minWidth: 220 }}>
+            <InputLabel id="item-select-label">Item</InputLabel>
+            <Select
+              labelId="item-select-label"
+              value={itemId}
+              label="Item"
+              onChange={(e) => setItemId(e.target.value)}
+            >
+              {itemOptions.map((item) => (
+                <MenuItem key={item.item_id} value={item.item_id}>
+                  {item.Brand} - {item.Description}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
           <TextField
             label="Forecast Days"
             type="number"
             value={forecastDays}
             onChange={(e) => setForecastDays(parseInt(e.target.value) || 7)}
           />
-          <Button variant="contained" onClick={getForecast}>
+          <Button variant="contained" onClick={getForecast} disabled={!itemId}>
             Generate Forecast
           </Button>
         </Box>
       </Paper>
-
-      {chartData && (
+      {forecastData && (
         <Paper elevation={3} sx={{ p: 2 }}>
-          <Line
-            ref={chartRef}
-            options={chartOptions}
-            data={chartData}
-          />
+          <Typography variant="h6">Forecast Results</Typography>
+          <pre>{JSON.stringify(forecastData, null, 2)}</pre>
         </Paper>
       )}
     </Box>
