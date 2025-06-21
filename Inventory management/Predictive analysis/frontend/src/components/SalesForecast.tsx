@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, TextField, Typography, Paper, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Paper,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from '@mui/material';
 import axios from 'axios';
 import { API_CONFIG } from '../config/api';
 
@@ -77,8 +93,33 @@ const SalesForecast: React.FC = () => {
       </Paper>
       {forecastData && (
         <Paper elevation={3} sx={{ p: 2 }}>
-          <Typography variant="h6">Forecast Results</Typography>
-          <pre>{JSON.stringify(forecastData, null, 2)}</pre>
+          <Typography variant="h6" gutterBottom>
+            Forecast Results (Next {forecastDays} Days)
+          </Typography>
+          <TableContainer component={Paper}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Day</TableCell>
+                  <TableCell>Ensemble Forecast</TableCell>
+                  <TableCell>SARIMA</TableCell>
+                  <TableCell>XGBoost</TableCell>
+                  <TableCell>Holt-Winters</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {forecastData.forecast.map((ensemble, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell>{ensemble.toFixed(2)}</TableCell>
+                    <TableCell>{forecastData.individual_forecasts.sarima[idx].toFixed(2)}</TableCell>
+                    <TableCell>{forecastData.individual_forecasts.xgboost[idx].toFixed(2)}</TableCell>
+                    <TableCell>{forecastData.individual_forecasts.holtwinters[idx].toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Paper>
       )}
     </Box>
