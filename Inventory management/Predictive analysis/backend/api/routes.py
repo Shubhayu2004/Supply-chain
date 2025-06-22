@@ -36,9 +36,10 @@ def model_info():
 @api_blueprint.route('/items', methods=['GET'])
 def get_items():
     # Adjust the path to your data file as needed
-    data_path = os.path.join(os.path.dirname(__file__), '../../data/preprocessed/sales_and_purchase_prices.csv')
+    data_path = os.path.join(os.path.dirname(__file__), '../models/synthetic_sales_2_years.csv')
     df = pd.read_csv(data_path)
-    # Combine Brand and Description for unique item identifier
-    df['item_id'] = df['Brand'].astype(str) + '|' + df['Description'].astype(str)
+    df['Brand'] = df['Brand'].astype(str).str.strip().str.lower()
+    df['Description'] = df['Description'].astype(str).str.strip().str.lower()
+    df['item_id'] = df['Brand'] + '|' + df['Description']
     items = df[['item_id', 'Brand', 'Description']].drop_duplicates().to_dict(orient='records')
     return jsonify(items)

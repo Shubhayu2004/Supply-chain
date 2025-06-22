@@ -5,9 +5,7 @@ from models.model_utils import prepare_forecast_output
 import pandas as pd
 
 def handle_predict_request():
-    """
-    Handle prediction request and return formatted response
-    """
+
     try:
         data = request.get_json()
         item_id = data.get('item_id')
