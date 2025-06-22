@@ -17,3 +17,4 @@ def save_models(sarima_model, xgb_model, hw_model):
     joblib.dump(xgb_model, model_path)  # Also save pickle for compatibility
     
     print("Models saved successfully!")
+
