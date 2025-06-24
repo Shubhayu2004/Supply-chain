@@ -1,0 +1,7 @@
+
+train: C:\Users\shubh\OneDrive\Documents\Machine learning projects\Uncompleted\Supply chain\Inventory management\Real time Monitoring\yolo_dataset\images\train
+val: C:\Users\shubh\OneDrive\Documents\Machine learning projects\Uncompleted\Supply chain\Inventory management\Real time Monitoring\yolo_dataset\images\valid
+test: C:\Users\shubh\OneDrive\Documents\Machine learning projects\Uncompleted\Supply chain\Inventory management\Real time Monitoring\yolo_dataset\images\test
+
+nc: 10
+names: ['candy_minipralines_lindt', 'cereal_cheerios_honeynut', 'cleaning_snuggle_henkel', 'craft_yarn_caron_01', 'drink_greentea_itoen', 'drink_whippingcream_lucerne', 'lotion_essentially_nivea', 'pasta_lasagne_barilla', 'snack_biscotti_ghiott_01', 'snack_granolabar_naturevalley']
