@@ -1,11 +1,25 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from database import SessionLocal
+import crud, schemas
+from typing import List
 
 router = APIRouter(prefix="/results", tags=["results"])
 
-@router.get("/{result_id}")
-def get_result(result_id: int):
-    return {"message": f"Get detection result {result_id} (to be implemented)"}
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
-@router.get("")
-def list_results():
-    return {"message": "List detection results (to be implemented)"} 
+@router.get("/{result_id}", response_model=schemas.DetectionResult)
+def get_result(result_id: int, db: Session = Depends(get_db)):
+    db_result = crud.get_detection_result(db, result_id)
+    if not db_result:
+        raise HTTPException(status_code=404, detail="Result not found")
+    return db_result
+
+@router.get("", response_model=List[schemas.DetectionResult])
+def list_results(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return crud.get_detection_results(db, skip=skip, limit=limit) 

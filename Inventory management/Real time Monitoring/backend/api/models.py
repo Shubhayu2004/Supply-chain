@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Float, DateTime, Text
-from .database import Base
+from database import Base
 import datetime
 
 class DetectionResult(Base):

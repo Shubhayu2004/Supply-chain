@@ -4,4 +4,5 @@ sqlalchemy
 pydantic
 ultralytics
 python-multipart
-pillow 
+pillow
+aiofiles 
