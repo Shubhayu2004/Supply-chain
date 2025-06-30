@@ -4,8 +4,15 @@ import os
 import uuid
 
 # Load the trained YOLOv8 model (update path if needed)
-MODEL_PATH = os.path.join(os.path.dirname(__file__), '../runs/detect/train/weights/best.pt')
-model = YOLO(MODEL_PATH)
+MODEL_PATH = os.path.join(os.path.dirname(__file__), '../../Notebooks/runs/detect/train/weights/best.pt')
+
+# Check if model file exists, if not use a default YOLO model
+if os.path.exists(MODEL_PATH):
+    model = YOLO(MODEL_PATH)
+else:
+    print(f"Warning: Model file not found at {MODEL_PATH}")
+    print("Using default YOLOv8n model instead.")
+    model = YOLO('yolov8n.pt')  # Use a default model as fallback
 
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), '../results')
 os.makedirs(RESULTS_DIR, exist_ok=True)

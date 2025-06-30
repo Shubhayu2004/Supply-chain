@@ -14,7 +14,7 @@ class DetectionResult(DetectionResultBase):
     id: int
     timestamp: datetime
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class InventoryItemBase(BaseModel):
     name: str
@@ -27,4 +27,4 @@ class InventoryItem(InventoryItemBase):
     id: int
     last_updated: datetime
     class Config:
-        orm_mode = True 
+        from_attributes = True 
